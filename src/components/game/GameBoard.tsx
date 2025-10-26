@@ -4,11 +4,11 @@ import { Card } from '../ui/Card';
 import { ResultScreen } from './ResultScreen';
 import { Tutorial } from './Tutorial';
 import { HistoryPanel } from './HistoryPanel';
-import { CardData } from '../types/card.types';
-import { GameConfig } from '../types/game-config.types';
-import { calculateScore, GameResult } from '../utils/scoring';
-import { soundManager } from '../utils/sounds';
-import { HistoryManager } from '../utils/history';
+import { CardData } from '../../types/card.types';
+import { GameConfig } from '../../types/game-config.types';
+import { calculateScore, GameResult } from '../../utils/scoring';
+import { soundManager } from '../../utils/sounds';
+import { HistoryManager } from '../../utils/history';
 
 type GamePhase = 'select-persona' | 'select-problem' | 'select-solution' | 'result';
 
@@ -29,13 +29,11 @@ export const GameBoard: React.FC<GameBoardProps> = ({ config }) => {
   const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  // configからカードデータを取得（configがない場合はデフォルト）
   const personaCards = config?.cards.personas || [];
   const problemCards = config?.cards.problems || [];
   const partnerCards = config?.cards.partners || [];
   const jobCards = config?.cards.jobs || [];
 
-  // テーマ設定
   const themeTitle = config?.theme.title || '🏙️ スマートシティ PBL カードゲーム';
   const themeSubtitle = config?.theme.subtitle || '地域課題を解決するための最適なチームを組み立てよう';
   const themePrimaryBg = config?.theme.colors.primary || 'from-purple-900 via-blue-900 to-indigo-900';
@@ -114,9 +112,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ config }) => {
   const getPhaseDescription = () => {
     switch (currentPhase) {
       case 'select-persona':
-        return 'まず、あなたの立場を選びます。市長、住民、NPO、企業のどれになりますか？';
+        return 'まず、あなたの立場を選びます。';
       case 'select-problem':
-        return '次に、この地域が抱える課題を選びます。最も重要な問題は何でしょうか？';
+        return '次に、解決したい課題を選びます。';
       case 'select-solution':
         return '最後に、課題を解決するためのパートナーと施策を選びましょう！（複数選択可）';
       default:
@@ -172,8 +170,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ config }) => {
         evaluation: result.evaluation,
         persona: selectedPersona?.title || '',
         problem: selectedProblem?.title || '',
-        partners: selectedPartners.map(p => p.title),
-        jobs: selectedJobs.map(j => j.title),
+        partners: selectedPartners.map((p: CardData) => p.title),
+        jobs: selectedJobs.map((j: CardData) => j.title),
       });
       
       setCurrentPhase('result');
@@ -301,7 +299,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ config }) => {
 
       <div className="max-w-7xl mx-auto mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
-          {getCurrentCards().map((card) => (
+          {getCurrentCards().map((card: CardData) => (
             <Card
               key={card.id}
               card={card}
