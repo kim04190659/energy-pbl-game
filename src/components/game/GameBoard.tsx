@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
-import { municipalityCards, getCardsByType } from '../../data/municipality-cards';
+import { ResultScreen } from './ResultScreen';
+import { getCardsByType } from '../../data/municipality-cards';
 import { CardData } from '../../types/card.types';
+import { calculateScore, GameResult } from '../../utils/scoring';
+
+type GamePhase = 'select-persona' | 'select-problem' | 'select-solution' | 'result';
 
 export const GameBoard: React.FC = () => {
-  const [selectedCards, setSelectedCards] = useState<CardData[]>([]);
-  const [currentPhase, setCurrentPhase] = useState<'select-persona' | 'select-problem' | 'select-solution'>('select-persona');
+  const [currentPhase, setCurrentPhase] = useState<GamePhase>('select-persona');
+  const [selectedPersona, setSelectedPersona] = useState<CardData | null>(null);
+  const [selectedProblem, setSelectedProblem] = useState<CardData | null>(null);
+  const [selectedPartners, setSelectedPartners] = useState<CardData[]>([]);
+  const [selectedJobs, setSelectedJobs] = useState<CardData[]>([]);
+  const [gameResult, setGameResult] = useState<GameResult | null>(null);
 
   const personaCards = getCardsByType('persona');
   const problemCards = getCardsByType('problem');
@@ -13,20 +22,36 @@ export const GameBoard: React.FC = () => {
   const jobCards = getCardsByType('job');
 
   const handleCardClick = (card: CardData) => {
-    console.log('カードクリック:', card.title);
-    
-    // 選択/解除のトグル
-    const isSelected = selectedCards.some(c => c.id === card.id);
-    
-    if (isSelected) {
-      setSelectedCards(selectedCards.filter(c => c.id !== card.id));
-    } else {
-      setSelectedCards([...selectedCards, card]);
+    if (currentPhase === 'select-persona') {
+      setSelectedPersona(card);
+    } else if (currentPhase === 'select-problem') {
+      setSelectedProblem(card);
+    } else if (currentPhase === 'select-solution') {
+      if (card.type === 'partner') {
+        setSelectedPartners(prev => 
+          prev.some(c => c.id === card.id)
+            ? prev.filter(c => c.id !== card.id)
+            : [...prev, card]
+        );
+      } else if (card.type === 'job') {
+        setSelectedJobs(prev =>
+          prev.some(c => c.id === card.id)
+            ? prev.filter(c => c.id !== card.id)
+            : [...prev, card]
+        );
+      }
     }
   };
 
-  const isCardSelected = (card: CardData) => {
-    return selectedCards.some(c => c.id === card.id);
+  const isCardSelected = (card: CardData): boolean => {
+    if (currentPhase === 'select-persona') {
+      return selectedPersona?.id === card.id;
+    } else if (currentPhase === 'select-problem') {
+      return selectedProblem?.id === card.id;
+    } else if (currentPhase === 'select-solution') {
+      return [...selectedPartners, ...selectedJobs].some(c => c.id === card.id);
+    }
+    return false;
   };
 
   const getPhaseTitle = () => {
@@ -49,7 +74,7 @@ export const GameBoard: React.FC = () => {
       case 'select-problem':
         return '次に、この地域が抱える課題を選びます。最も重要な問題は何でしょうか？';
       case 'select-solution':
-        return '最後に、課題を解決するためのパートナーと施策を選びましょう！';
+        return '最後に、課題を解決するためのパートナーと施策を選びましょう！（複数選択可）';
       default:
         return '';
     }
@@ -68,25 +93,62 @@ export const GameBoard: React.FC = () => {
     }
   };
 
+  const getSelectedCount = () => {
+    if (currentPhase === 'select-solution') {
+      return selectedPartners.length + selectedJobs.length;
+    }
+    return selectedPersona || selectedProblem ? 1 : 0;
+  };
+
+  const canProceed = () => {
+    if (currentPhase === 'select-persona') return selectedPersona !== null;
+    if (currentPhase === 'select-problem') return selectedProblem !== null;
+    if (currentPhase === 'select-solution') return selectedPartners.length > 0 || selectedJobs.length > 0;
+    return false;
+  };
+
   const handleNextPhase = () => {
     if (currentPhase === 'select-persona') {
       setCurrentPhase('select-problem');
-      setSelectedCards([]);
     } else if (currentPhase === 'select-problem') {
       setCurrentPhase('select-solution');
-      setSelectedCards([]);
-    } else {
-      // 結果計算（Week 2以降で実装）
-      alert('ゲーム完了！スコア計算機能はWeek 2で実装します。');
+    } else if (currentPhase === 'select-solution') {
+      // スコア計算
+      const result = calculateScore(
+        selectedPersona,
+        selectedProblem,
+        selectedPartners,
+        selectedJobs
+      );
+      setGameResult(result);
+      setCurrentPhase('result');
     }
   };
 
   const handleReset = () => {
     setCurrentPhase('select-persona');
-    setSelectedCards([]);
+    setSelectedPersona(null);
+    setSelectedProblem(null);
+    setSelectedPartners([]);
+    setSelectedJobs([]);
+    setGameResult(null);
   };
 
-  const canProceed = selectedCards.length > 0;
+  // 結果画面
+  if (currentPhase === 'result' && gameResult) {
+    return (
+      <ResultScreen
+        result={gameResult}
+        selectedCards={{
+          persona: selectedPersona,
+          problem: selectedProblem,
+          partners: selectedPartners,
+          jobs: selectedJobs,
+        }}
+        onRestart={handleReset}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-8 px-4">
@@ -125,10 +187,10 @@ export const GameBoard: React.FC = () => {
             {getPhaseDescription()}
           </p>
           
-          {selectedCards.length > 0 && (
+          {getSelectedCount() > 0 && (
             <div className="mt-4 p-4 bg-green-500/20 rounded-xl border border-green-500/30">
               <p className="text-white font-semibold text-center">
-                ✅ 選択中: {selectedCards.map(c => c.title).join(', ')}
+                ✅ {getSelectedCount()}個選択中
               </p>
             </div>
           )}
@@ -138,9 +200,17 @@ export const GameBoard: React.FC = () => {
       {/* プログレスバー */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex items-center justify-center gap-2">
-          <div className={`w-24 h-2 rounded-full ${currentPhase === 'select-persona' || currentPhase === 'select-problem' || currentPhase === 'select-solution' ? 'bg-green-500' : 'bg-white/20'}`} />
-          <div className={`w-24 h-2 rounded-full ${currentPhase === 'select-problem' || currentPhase === 'select-solution' ? 'bg-green-500' : 'bg-white/20'}`} />
-          <div className={`w-24 h-2 rounded-full ${currentPhase === 'select-solution' ? 'bg-green-500' : 'bg-white/20'}`} />
+          <div className={`w-24 h-2 rounded-full transition-all ${
+            currentPhase === 'select-persona' || currentPhase === 'select-problem' || currentPhase === 'select-solution' 
+              ? 'bg-green-500' : 'bg-white/20'
+          }`} />
+          <div className={`w-24 h-2 rounded-full transition-all ${
+            currentPhase === 'select-problem' || currentPhase === 'select-solution' 
+              ? 'bg-green-500' : 'bg-white/20'
+          }`} />
+          <div className={`w-24 h-2 rounded-full transition-all ${
+            currentPhase === 'select-solution' ? 'bg-green-500' : 'bg-white/20'
+          }`} />
         </div>
       </div>
 
@@ -162,23 +232,14 @@ export const GameBoard: React.FC = () => {
       <div className="max-w-7xl mx-auto flex justify-center gap-4 flex-wrap">
         <motion.button
           onClick={handleNextPhase}
-          disabled={!canProceed}
+          disabled={!canProceed()}
           className="bg-green-500 hover:bg-green-600 disabled:bg-gray-500 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition-all disabled:cursor-not-allowed text-lg"
-          whileHover={canProceed ? { scale: 1.05 } : {}}
-          whileTap={canProceed ? { scale: 0.95 } : {}}
+          whileHover={canProceed() ? { scale: 1.05 } : {}}
+          whileTap={canProceed() ? { scale: 0.95 } : {}}
         >
           {currentPhase === 'select-solution' ? '結果を見る 🎯' : '次へ進む →'}
         </motion.button>
         
-        <motion.button
-          onClick={() => setSelectedCards([])}
-          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition-all text-lg"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          選択をクリア
-        </motion.button>
-
         <motion.button
           onClick={handleReset}
           className="bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition-all text-lg"
@@ -193,17 +254,10 @@ export const GameBoard: React.FC = () => {
       <div className="max-w-7xl mx-auto mt-12 text-center">
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 inline-block">
           <p className="text-white/60 text-sm">
-            現在のフェーズ: <span className="font-bold text-white">{currentPhase}</span> | 
-            選択カード数: <span className="font-bold text-white">{selectedCards.length}</span>
-          </p>
-          <p className="text-white/40 text-xs mt-2">
-            Created by 木村好孝 | Week 1 Demo Version
+            Created by 木村好孝 | Week 1-2 Version
           </p>
         </div>
       </div>
     </div>
   );
 };
-
-// framer-motionのインポートを追加
-import { motion } from 'framer-motion';
