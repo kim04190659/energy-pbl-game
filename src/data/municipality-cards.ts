@@ -1,7 +1,7 @@
 import { CardData, CardType } from '../types/card.types';
 
 export const municipalityCards: CardData[] = [
-  // ペルソナカード
+  // ペルソナカード（8枚）
   {
     id: 'persona-muni-001',
     type: 'persona',
@@ -34,8 +34,24 @@ export const municipalityCards: CardData[] = [
     category: 'business',
     tags: ['移住', 'IT', 'リモートワーク'],
   },
+  {
+    id: 'persona-muni-005',
+    type: 'persona',
+    title: '大学教授',
+    description: '地域と大学の連携で社会課題解決を研究',
+    category: 'academic',
+    tags: ['研究', '教育', '産学連携'],
+  },
+  {
+    id: 'persona-muni-006',
+    type: 'persona',
+    title: '商店街会長',
+    description: '衰退する中心市街地の再生を目指す',
+    category: 'business',
+    tags: ['商業', '経済', '活性化'],
+  },
 
-  // 問題カード
+  // 問題カード（6枚）
   {
     id: 'problem-muni-001',
     type: 'problem',
@@ -72,8 +88,26 @@ export const municipalityCards: CardData[] = [
     category: 'economy',
     tags: ['商店街', '経済', '中心市街地'],
   },
+  {
+    id: 'problem-muni-005',
+    type: 'problem',
+    title: '医療・福祉の不足',
+    description: '病院が遠く、高齢者の医療アクセスが課題',
+    score: -75,
+    category: 'healthcare',
+    tags: ['医療', '福祉', '健康'],
+  },
+  {
+    id: 'problem-muni-006',
+    type: 'problem',
+    title: '若者の雇用機会不足',
+    description: '地元に働く場所がなく、都市部へ流出',
+    score: -85,
+    category: 'employment',
+    tags: ['雇用', '若者', 'キャリア'],
+  },
 
-  // パートナーカード
+  // パートナーカード（6枚）
   {
     id: 'partner-muni-001',
     type: 'partner',
@@ -110,8 +144,26 @@ export const municipalityCards: CardData[] = [
     category: 'technology',
     tags: ['IT', 'シビックテック', 'オープンデータ'],
   },
+  {
+    id: 'partner-muni-005',
+    type: 'partner',
+    title: '金融機関',
+    description: '地域創生ファンドで資金面をサポート',
+    score: 40,
+    category: 'finance',
+    tags: ['資金', '融資', '投資'],
+  },
+  {
+    id: 'partner-muni-006',
+    type: 'partner',
+    title: 'メディア企業',
+    description: '地域の魅力を発信し、認知度向上に貢献',
+    score: 35,
+    category: 'media',
+    tags: ['広報', 'PR', '情報発信'],
+  },
 
-  // ジョブカード
+  // ジョブカード（6枚）
   {
     id: 'job-muni-001',
     type: 'job',
@@ -148,9 +200,26 @@ export const municipalityCards: CardData[] = [
     category: 'digital',
     tags: ['DX', 'オンライン', '行政サービス'],
   },
+  {
+    id: 'job-muni-005',
+    type: 'job',
+    title: 'ワーケーション拠点整備',
+    description: 'リモートワーカーを呼び込む施設を整備',
+    score: 65,
+    category: 'infrastructure',
+    tags: ['ワーケーション', '施設', '誘致'],
+  },
+  {
+    id: 'job-muni-006',
+    type: 'job',
+    title: '地域通貨システム導入',
+    description: '地域内での経済循環を促進する独自通貨',
+    score: 60,
+    category: 'economy',
+    tags: ['地域通貨', '経済循環', 'コミュニティ'],
+  },
 ];
 
-// カードタイプごとに取得
 export const getCardsByType = (type: CardType) => {
   return municipalityCards.filter(card => card.type === type);
 };
