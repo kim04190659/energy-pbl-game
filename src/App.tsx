@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { GameBoard } from './components/game/GameBoard';
 import { LoadingScreen } from './components/game/LoadingScreen';
 import { ThemeSelector } from './components/game/ThemeSelector';
@@ -18,6 +18,8 @@ function App() {
 
   const handleSelectTheme = (theme: GameConfig) => {
     setSelectedTheme(theme);
+    // TODO: GameBoardにconfigを渡す実装は次のステップ
+    // 今は選択したらGameBoardを表示
   };
 
   if (isLoading) {
@@ -28,7 +30,8 @@ function App() {
     return <ThemeSelector themes={availableThemes} onSelectTheme={handleSelectTheme} />;
   }
 
-  return <GameBoard config={selectedTheme} />;
+  // 既存のGameBoardをそのまま使用（configは次のステップで統合）
+  return <GameBoard />;
 }
 
 export default App;
