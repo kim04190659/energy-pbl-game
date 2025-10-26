@@ -5,6 +5,7 @@ import { ResultScreen } from './ResultScreen';
 import { getCardsByType } from '../../data/municipality-cards';
 import { CardData } from '../../types/card.types';
 import { calculateScore, GameResult } from '../../utils/scoring';
+import { soundManager } from '../../utils/sounds';
 
 type GamePhase = 'select-persona' | 'select-problem' | 'select-solution' | 'result';
 
@@ -108,12 +109,13 @@ export const GameBoard: React.FC = () => {
   };
 
   const handleNextPhase = () => {
+    soundManager.playNextPhase();
+    
     if (currentPhase === 'select-persona') {
       setCurrentPhase('select-problem');
     } else if (currentPhase === 'select-problem') {
       setCurrentPhase('select-solution');
     } else if (currentPhase === 'select-solution') {
-      // スコア計算
       const result = calculateScore(
         selectedPersona,
         selectedProblem,
@@ -134,7 +136,6 @@ export const GameBoard: React.FC = () => {
     setGameResult(null);
   };
 
-  // 結果画面
   if (currentPhase === 'result' && gameResult) {
     return (
       <ResultScreen
@@ -152,7 +153,6 @@ export const GameBoard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-8 px-4">
-      {/* ヘッダー */}
       <div className="max-w-7xl mx-auto mb-8">
         <motion.h1 
           className="text-4xl md:text-5xl font-bold text-white text-center mb-4"
@@ -172,7 +172,6 @@ export const GameBoard: React.FC = () => {
         </motion.p>
       </div>
 
-      {/* フェーズ情報カード */}
       <div className="max-w-7xl mx-auto mb-8">
         <motion.div 
           className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-white/20"
@@ -197,7 +196,6 @@ export const GameBoard: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* プログレスバー */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex items-center justify-center gap-2">
           <div className={`w-24 h-2 rounded-full transition-all ${
@@ -214,7 +212,6 @@ export const GameBoard: React.FC = () => {
         </div>
       </div>
 
-      {/* カード表示エリア */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
           {getCurrentCards().map((card) => (
@@ -228,7 +225,6 @@ export const GameBoard: React.FC = () => {
         </div>
       </div>
 
-      {/* 操作ボタン */}
       <div className="max-w-7xl mx-auto flex justify-center gap-4 flex-wrap">
         <motion.button
           onClick={handleNextPhase}
@@ -250,7 +246,6 @@ export const GameBoard: React.FC = () => {
         </motion.button>
       </div>
 
-      {/* フッター情報 */}
       <div className="max-w-7xl mx-auto mt-12 text-center">
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 inline-block">
           <p className="text-white/60 text-sm">

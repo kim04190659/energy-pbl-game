@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CardData } from '../../types/card.types';
+import { soundManager } from '../../utils/sounds';
 
 interface CardProps {
   card: CardData;
@@ -39,6 +40,15 @@ export const Card: React.FC<CardProps> = ({ card, onClick, isSelected = false })
     }
   };
 
+  const handleClick = () => {
+    soundManager.playCardSelect();
+    onClick?.();
+  };
+
+  const handleHover = () => {
+    soundManager.playCardHover();
+  };
+
   return (
     <motion.div
       className={`
@@ -47,7 +57,8 @@ export const Card: React.FC<CardProps> = ({ card, onClick, isSelected = false })
         overflow-hidden
         ${isSelected ? 'ring-4 ring-yellow-400 ring-offset-4 ring-offset-purple-900' : ''}
       `}
-      onClick={onClick}
+      onClick={handleClick}
+      onHoverStart={handleHover}
       whileHover={{ 
         scale: 1.08, 
         y: -15,
@@ -69,18 +80,15 @@ export const Card: React.FC<CardProps> = ({ card, onClick, isSelected = false })
           : '0 10px 40px rgba(0, 0, 0, 0.3)'
       }}
     >
-      {/* 背景パターン */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-2xl" />
       </div>
 
-      {/* カードタイプラベル */}
       <div className="absolute top-3 left-3 bg-white/30 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs text-white font-bold shadow-lg">
         {getCardTypeLabel()}
       </div>
 
-      {/* スコア表示 */}
       {card.score && (
         <motion.div 
           className="absolute top-3 right-3 w-12 h-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center shadow-xl"
@@ -93,7 +101,6 @@ export const Card: React.FC<CardProps> = ({ card, onClick, isSelected = false })
         </motion.div>
       )}
 
-      {/* 選択マーク */}
       {isSelected && (
         <motion.div 
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-8xl drop-shadow-2xl"
@@ -105,9 +112,7 @@ export const Card: React.FC<CardProps> = ({ card, onClick, isSelected = false })
         </motion.div>
       )}
 
-      {/* カード中央部 */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full px-5 py-6">
-        {/* アイコン */}
         <motion.div 
           className="text-7xl mb-4 drop-shadow-2xl filter"
           whileHover={{ scale: 1.2, rotate: [0, -10, 10, 0] }}
@@ -116,18 +121,15 @@ export const Card: React.FC<CardProps> = ({ card, onClick, isSelected = false })
           {getCardIcon()}
         </motion.div>
 
-        {/* タイトル */}
         <h3 className="text-white text-lg font-bold text-center mb-3 leading-tight drop-shadow-lg">
           {card.title}
         </h3>
 
-        {/* 説明 */}
         <p className="text-white/95 text-sm text-center leading-relaxed drop-shadow-md">
           {card.description}
         </p>
       </div>
 
-      {/* カテゴリタグ */}
       {card.category && (
         <div className="absolute bottom-3 left-3 right-3">
           <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-1.5 shadow-lg">
@@ -138,10 +140,8 @@ export const Card: React.FC<CardProps> = ({ card, onClick, isSelected = false })
         </div>
       )}
 
-      {/* グロー効果 */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/10 opacity-0 hover:opacity-100 transition-opacity pointer-events-none" />
       
-      {/* 選択時のパルスエフェクト */}
       {isSelected && (
         <motion.div
           className="absolute inset-0 border-4 border-yellow-400 rounded-2xl"
