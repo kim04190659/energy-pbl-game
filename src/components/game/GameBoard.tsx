@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { ResultScreen } from './ResultScreen';
 import { Tutorial } from './Tutorial';
+import { HistoryPanel } from './HistoryPanel';
 import { getCardsByType } from '../../data/municipality-cards';
 import { CardData } from '../../types/card.types';
 import { calculateScore, GameResult } from '../../utils/scoring';
 import { soundManager } from '../../utils/sounds';
+import { HistoryManager } from '../../utils/history';
 
 type GamePhase = 'select-persona' | 'select-problem' | 'select-solution' | 'result';
 
@@ -21,6 +23,7 @@ export const GameBoard: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const personaCards = getCardsByType('persona');
   const problemCards = getCardsByType('problem');
@@ -153,6 +156,17 @@ export const GameBoard: React.FC = () => {
         selectedJobs
       );
       setGameResult(result);
+      
+      // 履歴に保存
+      HistoryManager.savePlay({
+        score: result.totalScore,
+        evaluation: result.evaluation,
+        persona: selectedPersona?.title || '',
+        problem: selectedProblem?.title || '',
+        partners: selectedPartners.map(p => p.title),
+        jobs: selectedJobs.map(j => j.title),
+      });
+      
       setCurrentPhase('result');
     }
   };
@@ -191,6 +205,18 @@ export const GameBoard: React.FC = () => {
           onSkip={handleTutorialSkip}
         />
       )}
+
+      <HistoryPanel isOpen={showHistory} onClose={() => setShowHistory(false)} />
+
+      {/* 履歴ボタン */}
+      <motion.button
+        onClick={() => setShowHistory(true)}
+        className="fixed top-4 right-4 z-30 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all border border-white/30"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        📊 履歴
+      </motion.button>
 
       <div className="max-w-7xl mx-auto mb-8">
         <motion.h1 
@@ -302,7 +328,7 @@ export const GameBoard: React.FC = () => {
       <div className="max-w-7xl mx-auto mt-12 text-center">
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 inline-block">
           <p className="text-white/60 text-sm">
-            Created by 木村好孝 | Week 1-2 Complete Version
+            Created by 木村好孝 | Complete Version 1.0
           </p>
         </div>
       </div>
