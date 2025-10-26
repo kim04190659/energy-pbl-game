@@ -18,8 +18,6 @@ function App() {
 
   const handleSelectTheme = (theme: GameConfig) => {
     setSelectedTheme(theme);
-    // TODO: GameBoardにconfigを渡す実装は次のステップ
-    // 今は選択したらGameBoardを表示
   };
 
   if (isLoading) {
@@ -30,8 +28,7 @@ function App() {
     return <ThemeSelector themes={availableThemes} onSelectTheme={handleSelectTheme} />;
   }
 
-  // 既存のGameBoardをそのまま使用（configは次のステップで統合）
-  return <GameBoard />;
+  return <GameBoard config={selectedTheme} />;
 }
 
 export default App;

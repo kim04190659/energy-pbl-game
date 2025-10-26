@@ -4,15 +4,19 @@ import { Card } from '../ui/Card';
 import { ResultScreen } from './ResultScreen';
 import { Tutorial } from './Tutorial';
 import { HistoryPanel } from './HistoryPanel';
-import { getCardsByType } from '../../data/municipality-cards';
-import { CardData } from '../../types/card.types';
-import { calculateScore, GameResult } from '../../utils/scoring';
-import { soundManager } from '../../utils/sounds';
-import { HistoryManager } from '../../utils/history';
+import { CardData } from '../types/card.types';
+import { GameConfig } from '../types/game-config.types';
+import { calculateScore, GameResult } from '../utils/scoring';
+import { soundManager } from '../utils/sounds';
+import { HistoryManager } from '../utils/history';
 
 type GamePhase = 'select-persona' | 'select-problem' | 'select-solution' | 'result';
 
-export const GameBoard: React.FC = () => {
+interface GameBoardProps {
+  config?: GameConfig;
+}
+
+export const GameBoard: React.FC<GameBoardProps> = ({ config }) => {
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('select-persona');
   const [selectedPersona, setSelectedPersona] = useState<CardData | null>(null);
   const [selectedProblem, setSelectedProblem] = useState<CardData | null>(null);
@@ -25,19 +29,25 @@ export const GameBoard: React.FC = () => {
   const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  const personaCards = getCardsByType('persona');
-  const problemCards = getCardsByType('problem');
-  const partnerCards = getCardsByType('partner');
-  const jobCards = getCardsByType('job');
+  // configからカードデータを取得（configがない場合はデフォルト）
+  const personaCards = config?.cards.personas || [];
+  const problemCards = config?.cards.problems || [];
+  const partnerCards = config?.cards.partners || [];
+  const jobCards = config?.cards.jobs || [];
+
+  // テーマ設定
+  const themeTitle = config?.theme.title || '🏙️ スマートシティ PBL カードゲーム';
+  const themeSubtitle = config?.theme.subtitle || '地域課題を解決するための最適なチームを組み立てよう';
+  const themePrimaryBg = config?.theme.colors.primary || 'from-purple-900 via-blue-900 to-indigo-900';
 
   useEffect(() => {
     const seen = localStorage.getItem('hasSeenTutorial');
-    if (!seen) {
+    if (!seen && config?.ui.showTutorial) {
       setShowTutorial(true);
     } else {
       setHasSeenTutorial(true);
     }
-  }, []);
+  }, [config]);
 
   const handleTutorialNext = () => {
     if (tutorialStep < 4) {
@@ -157,7 +167,6 @@ export const GameBoard: React.FC = () => {
       );
       setGameResult(result);
       
-      // 履歴に保存
       HistoryManager.savePlay({
         score: result.totalScore,
         evaluation: result.evaluation,
@@ -196,7 +205,7 @@ export const GameBoard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-8 px-4">
+    <div className={`min-h-screen bg-gradient-to-br ${themePrimaryBg} py-8 px-4`}>
       {showTutorial && (
         <Tutorial
           step={tutorialStep}
@@ -208,7 +217,6 @@ export const GameBoard: React.FC = () => {
 
       <HistoryPanel isOpen={showHistory} onClose={() => setShowHistory(false)} />
 
-      {/* 履歴ボタン */}
       <motion.button
         onClick={() => setShowHistory(true)}
         className="fixed top-4 right-4 z-30 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all border border-white/30"
@@ -225,7 +233,7 @@ export const GameBoard: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          🏙️ スマートシティ PBL カードゲーム
+          {themeTitle}
         </motion.h1>
         <motion.p 
           className="text-white/80 text-center text-lg"
@@ -233,7 +241,7 @@ export const GameBoard: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          地域課題を解決するための最適なチームを組み立てよう
+          {themeSubtitle}
         </motion.p>
         
         {hasSeenTutorial && (
@@ -328,7 +336,7 @@ export const GameBoard: React.FC = () => {
       <div className="max-w-7xl mx-auto mt-12 text-center">
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 inline-block">
           <p className="text-white/60 text-sm">
-            Created by 木村好孝 | Complete Version 1.0
+            Created by 木村好孝 | 汎用版 v1.0 - {config?.name || 'デフォルト'}
           </p>
         </div>
       </div>
