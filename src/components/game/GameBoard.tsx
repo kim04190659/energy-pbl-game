@@ -18,7 +18,6 @@ export const GameBoard: React.FC = () => {
   const [selectedJobs, setSelectedJobs] = useState<CardData[]>([]);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   
-  // チュートリアル関連
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
@@ -28,7 +27,6 @@ export const GameBoard: React.FC = () => {
   const partnerCards = getCardsByType('partner');
   const jobCards = getCardsByType('job');
 
-  // 初回訪問時にチュートリアルを表示
   useEffect(() => {
     const seen = localStorage.getItem('hasSeenTutorial');
     if (!seen) {
@@ -185,14 +183,12 @@ export const GameBoard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-8 px-4">
-      {/* チュートリアル */}
       {showTutorial && (
         <Tutorial
           step={tutorialStep}
           totalSteps={5}
           onNext={handleTutorialNext}
           onSkip={handleTutorialSkip}
-          phase={currentPhase}
         />
       )}
 
@@ -214,7 +210,6 @@ export const GameBoard: React.FC = () => {
           地域課題を解決するための最適なチームを組み立てよう
         </motion.p>
         
-        {/* チュートリアル再表示ボタン */}
         {hasSeenTutorial && (
           <div className="text-center mt-4">
             <button

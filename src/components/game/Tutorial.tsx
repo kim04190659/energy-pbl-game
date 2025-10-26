@@ -6,10 +6,9 @@ interface TutorialProps {
   totalSteps: number;
   onNext: () => void;
   onSkip: () => void;
-  phase: 'select-persona' | 'select-problem' | 'select-solution' | null;
 }
 
-export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, onSkip, phase }) => {
+export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, onSkip }) => {
   const getTutorialContent = () => {
     switch (step) {
       case 0:
@@ -90,7 +89,6 @@ export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, on
           className="bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-600 rounded-3xl p-8 max-w-2xl mx-4 shadow-2xl border-4 border-white/30"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* ヘッダー */}
           <div className="text-center mb-6">
             <motion.div
               initial={{ scale: 0 }}
@@ -118,7 +116,6 @@ export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, on
             </motion.p>
           </div>
 
-          {/* ヒント */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -141,7 +138,6 @@ export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, on
             </div>
           </motion.div>
 
-          {/* プログレス */}
           <div className="mb-6">
             <div className="flex justify-center gap-2 mb-2">
               {[...Array(totalSteps)].map((_, i) => (
@@ -158,7 +154,6 @@ export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, on
             </p>
           </div>
 
-          {/* ボタン */}
           <div className="flex gap-4">
             <motion.button
               onClick={onSkip}
