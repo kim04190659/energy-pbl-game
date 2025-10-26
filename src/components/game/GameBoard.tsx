@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { ResultScreen } from './ResultScreen';
+import { Tutorial } from './Tutorial';
 import { getCardsByType } from '../../data/municipality-cards';
 import { CardData } from '../../types/card.types';
 import { calculateScore, GameResult } from '../../utils/scoring';
@@ -16,11 +17,42 @@ export const GameBoard: React.FC = () => {
   const [selectedPartners, setSelectedPartners] = useState<CardData[]>([]);
   const [selectedJobs, setSelectedJobs] = useState<CardData[]>([]);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
+  
+  // チュートリアル関連
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const [hasSeenTutorial, setHasSeenTutorial] = useState(false);
 
   const personaCards = getCardsByType('persona');
   const problemCards = getCardsByType('problem');
   const partnerCards = getCardsByType('partner');
   const jobCards = getCardsByType('job');
+
+  // 初回訪問時にチュートリアルを表示
+  useEffect(() => {
+    const seen = localStorage.getItem('hasSeenTutorial');
+    if (!seen) {
+      setShowTutorial(true);
+    } else {
+      setHasSeenTutorial(true);
+    }
+  }, []);
+
+  const handleTutorialNext = () => {
+    if (tutorialStep < 4) {
+      setTutorialStep(tutorialStep + 1);
+    } else {
+      setShowTutorial(false);
+      setHasSeenTutorial(true);
+      localStorage.setItem('hasSeenTutorial', 'true');
+    }
+  };
+
+  const handleTutorialSkip = () => {
+    setShowTutorial(false);
+    setHasSeenTutorial(true);
+    localStorage.setItem('hasSeenTutorial', 'true');
+  };
 
   const handleCardClick = (card: CardData) => {
     if (currentPhase === 'select-persona') {
@@ -153,6 +185,17 @@ export const GameBoard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-8 px-4">
+      {/* チュートリアル */}
+      {showTutorial && (
+        <Tutorial
+          step={tutorialStep}
+          totalSteps={5}
+          onNext={handleTutorialNext}
+          onSkip={handleTutorialSkip}
+          phase={currentPhase}
+        />
+      )}
+
       <div className="max-w-7xl mx-auto mb-8">
         <motion.h1 
           className="text-4xl md:text-5xl font-bold text-white text-center mb-4"
@@ -170,6 +213,21 @@ export const GameBoard: React.FC = () => {
         >
           地域課題を解決するための最適なチームを組み立てよう
         </motion.p>
+        
+        {/* チュートリアル再表示ボタン */}
+        {hasSeenTutorial && (
+          <div className="text-center mt-4">
+            <button
+              onClick={() => {
+                setShowTutorial(true);
+                setTutorialStep(0);
+              }}
+              className="text-white/60 hover:text-white text-sm underline transition-colors"
+            >
+              ❓ チュートリアルをもう一度見る
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto mb-8">
@@ -249,7 +307,7 @@ export const GameBoard: React.FC = () => {
       <div className="max-w-7xl mx-auto mt-12 text-center">
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 inline-block">
           <p className="text-white/60 text-sm">
-            Created by 木村好孝 | Week 1-2 Version
+            Created by 木村好孝 | Week 1-2 Complete Version
           </p>
         </div>
       </div>
