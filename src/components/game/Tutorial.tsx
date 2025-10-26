@@ -1,20 +1,25 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GameConfig } from '../../types/game-config.types';
 
 interface TutorialProps {
   step: number;
   totalSteps: number;
   onNext: () => void;
   onSkip: () => void;
+  config?: GameConfig;
 }
 
-export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, onSkip }) => {
+export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, onSkip, config }) => {
+  const themeIcon = config?.theme.icon || '🎮';
+  const themeName = config?.name || 'PBLゲーム';
+  
   const getTutorialContent = () => {
     switch (step) {
       case 0:
         return {
           title: '👋 ようこそ！',
-          description: 'スマートシティPBLカードゲームへようこそ！このゲームでは、地域課題を解決するための最適なチームを組み立てます。',
+          description: `${themeName}へようこそ！このゲームでは、課題を解決するための最適なチームを組み立てます。`,
           tips: [
             '🎯 3つのステップで課題解決プランを作成',
             '💡 カードの組み合わせでスコアが変わります',
@@ -25,21 +30,18 @@ export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, on
         return {
           title: '🎭 ステップ1: ペルソナ選択',
           description: 'まず、あなたの役割を選びます。それぞれの立場で異なる視点から課題に取り組めます。',
-          tips: [
-            '市長：政策決定権があります',
-            '住民代表：地域の声を代弁します',
-            'NPO理事長：現場の課題を知っています',
-            'IT企業社員：テクノロジーで支援します'
+          tips: config?.cards.personas.slice(0, 4).map(p => `${p.title}：${p.description}`) || [
+            '役割を選択してください'
           ]
         };
       case 2:
         return {
           title: '⚠️ ステップ2: 課題選択',
-          description: '解決したい地域課題を選びます。課題によってスコアが異なります。',
+          description: '解決したい課題を選びます。課題によってスコアが異なります。',
           tips: [
             '📊 スコアの高い課題ほど重要度が高い',
             '🎯 ペルソナとの相性もあります',
-            '💭 実際の地域をイメージしてみましょう'
+            '💭 実際の状況をイメージしてみましょう'
           ]
         };
       case 3:
@@ -47,8 +49,8 @@ export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, on
           title: '💡 ステップ3: ソリューション構築',
           description: 'パートナーと施策を組み合わせて、課題解決のプランを作ります。',
           tips: [
-            '🤝 パートナー：協力してくれる組織',
-            '💼 施策：具体的な解決策',
+            '🤝 パートナー：協力してくれる組織や人',
+            '💼 施策：具体的な解決策やプロジェクト',
             '✨ 複数選択でシナジー効果が生まれます',
             '🎨 相性の良い組み合わせを探しましょう'
           ]
@@ -60,7 +62,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, on
           tips: [
             '📈 基本スコア：各カードの点数',
             '⚡ シナジーボーナス：相性の良い組み合わせ',
-            '🏆 S評価（200点以上）を目指そう！',
+            `🏆 S評価（${config?.scoring.evaluationThresholds.S || 200}点以上）を目指そう！`,
             '🔄 何度でもプレイできます'
           ]
         };
@@ -96,7 +98,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ step, totalSteps, onNext, on
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               className="text-7xl mb-4"
             >
-              {step === 0 ? '🎮' : step === 1 ? '🎭' : step === 2 ? '⚠️' : step === 3 ? '💡' : '🎊'}
+              {step === 0 ? themeIcon : step === 1 ? '🎭' : step === 2 ? '⚠️' : step === 3 ? '💡' : '🎊'}
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: -20 }}

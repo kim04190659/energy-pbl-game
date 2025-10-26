@@ -210,6 +210,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ config }) => {
           totalSteps={5}
           onNext={handleTutorialNext}
           onSkip={handleTutorialSkip}
+          config={config}
         />
       )}
 
